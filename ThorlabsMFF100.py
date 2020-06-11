@@ -2,12 +2,10 @@ import time
 import numpy
 import thorpy.flipmount.flipmount as fm
 
-
-
 from tango import AttrQuality, AttrWriteType, DispLevel, DevState, DebugIt
 from tango.server import Device, attribute, command, pipe, device_property
 
-class ThorlabsFlipMount(Device):
+class ThorlabsMFF100(Device):
 
     isMoving = attribute(label="Moving", dtype=bool,
                          display_level=DispLevel.OPERATOR,
@@ -84,8 +82,4 @@ class ThorlabsFlipMount(Device):
         self.mount.identify()
 
 if __name__ == "__main__":
-    ThorlabsFlipMount.run_server()
-
-
-
-
+    ThorlabsMFF100.run_server()

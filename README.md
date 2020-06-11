@@ -1,6 +1,13 @@
-# pytango-thorlabs_flipmount
+# pytango-ThorlabsMFF100
+
+PyTango Device Server to control motorized flip mirrors from Thorlabs: MFF101/102
 
 # Installation
-Download the python package thorpy from https://github.com/felix92/thorpy
 
-Install the package: python setup.py install
+Clone/download adapted `thorpy` package
+
+`git clone https://github.com/felix92/thorpy.git`
+
+and install 
+
+`python3 setup.py install`
