@@ -1,33 +1,42 @@
-import time
-import numpy
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+
+# Copyright (C) 2020  MBI-Division-B
+# MIT License, refer to LICENSE file
+# Author: / Email:
+
 import thorpy.flipmount.flipmount as fm
 
-from tango import AttrQuality, AttrWriteType, DispLevel, DevState, DebugIt
-from tango.server import Device, attribute, command, pipe, device_property
+from tango import AttrWriteType, DispLevel, DevState
+from tango.server import Device, attribute, command, device_property
+
 
 class ThorlabsMFF100(Device):
 
-    isMoving = attribute(label="Moving", dtype=bool,
+    isMoving = attribute(label="Moving",
+                         dtype=bool,
                          display_level=DispLevel.OPERATOR,
                          access=AttrWriteType.READ,
                          doc="True if mount is moving")
 
-    isOpen = attribute(label="Open", dtype=bool,
-                         display_level=DispLevel.OPERATOR,
-                         access=AttrWriteType.READ,
-                         doc="True if mount is down")
+    isOpen = attribute(label="Open",
+                       dtype=bool,
+                       display_level=DispLevel.OPERATOR,
+                       access=AttrWriteType.READ,
+                       doc="True if mount is down")
 
-    isClose = attribute(label="Close", dtype=bool,
-                         display_level=DispLevel.OPERATOR,
-                         access=AttrWriteType.READ,
-                         doc="True if mount is up")
+    isClose = attribute(label="Close",
+                        dtype=bool,
+                        display_level=DispLevel.OPERATOR,
+                        access=AttrWriteType.READ,
+                        doc="True if mount is up")
 
-    serial_num = attribute(label="Serialnumber", dtype=str,
-                         display_level=DispLevel.OPERATOR,
-                         access=AttrWriteType.READ,
-                         doc="Serial number of device")
-
-
+    serial_num = attribute(label="Serialnumber",
+                           dtype=str,
+                           display_level=DispLevel.OPERATOR,
+                           access=AttrWriteType.READ,
+                           doc="Serial number of device")
 
     serial_number = device_property(dtype=str)
 
@@ -80,6 +89,7 @@ class ThorlabsMFF100(Device):
     @command
     def Identify(self):
         self.mount.identify()
+
 
 if __name__ == "__main__":
     ThorlabsMFF100.run_server()
