@@ -11,3 +11,16 @@ Clone/download adapted `thorpy` package
 and install 
 
 `python3 setup.py install`
+
+## udev rule
+
+Create a new udev rule
+
+    > sudo nano /etc/udev/rules.d/99-thorlabs.rules
+    
+    SUBSYSTEMS=="usb", ATTRS{manufacturer}=="Thorlabs", MODE="0666"
+
+Relaod and apply the udev rule by
+
+    sudo udevadm control --reload
+    sudo udevadm trigger --action=add
