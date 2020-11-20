@@ -18,7 +18,7 @@ Create a new udev rule
 
     > sudo nano /etc/udev/rules.d/99-thorlabs.rules
     
-    SUBSYSTEMS=="usb", ATTRS{manufacturer}=="Thorlabs", MODE="0666"
+    ACTION=="add", SUBSYSTEMS=="usb", ATTRS{idVendor}=="0403", MODE="0666"
 
 Relaod and apply the udev rule by
 
