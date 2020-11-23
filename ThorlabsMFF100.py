@@ -11,27 +11,8 @@ import thorpy.flipmount.flipmount as fm
 from tango import AttrWriteType, DispLevel, DevState
 from tango.server import Device, attribute, command, device_property
 
-
+    
 class ThorlabsMFF100(Device):
-
-    isMoving = attribute(label="Moving",
-                         dtype=bool,
-                         display_level=DispLevel.OPERATOR,
-                         access=AttrWriteType.READ,
-                         doc="True if mount is moving")
-
-    isOpen = attribute(label="Open",
-                       dtype=bool,
-                       display_level=DispLevel.OPERATOR,
-                       access=AttrWriteType.READ,
-                       doc="True if mount is down")
-
-    isClose = attribute(label="Close",
-                        dtype=bool,
-                        display_level=DispLevel.OPERATOR,
-                        access=AttrWriteType.READ,
-                        doc="True if mount is up")
-
     serial_num = attribute(label="Serialnumber",
                            dtype=str,
                            display_level=DispLevel.OPERATOR,
@@ -42,29 +23,27 @@ class ThorlabsMFF100(Device):
 
     def init_device(self):
         Device.init_device(self)
+        self.info_stream('Thorlabs Flip Mirror Mount with serial {:s}'.format(self.serial_number))
         self.mount = fm.flipMount(self.serial_number)
         self.set_state(DevState.ON)
 
-    def read_isMoving(self):
-        tmp_moving = self.mount.is_moving()
-        if tmp_moving:
-            self.set_state(DevState.MOVING)
-        return tmp_moving
-
-    def read_isOpen(self):
-        tmp_open = self.mount.is_open()
-        if tmp_open:
-            self.set_state(DevState.OPEN)
-        return tmp_open
-
-    def read_isClose(self):
-        tmp_close = self.mount.is_close()
-        if tmp_close:
-            self.set_state(DevState.CLOSE)
-        return tmp_close
-
-#    def set_serial_number(self):
-#        return self.__serial_number
+    def dev_state(self):
+        if self.mount.is_moving():
+            self.set_status("Thorlabs Flip Mirror is: MOVING")
+            self.debug_stream("Thorlabs Flip Mirror is: MOVING")
+            return DevState.MOVING
+        elif self.mount.is_open():
+            self.set_status("Thorlabs Flip Mirror is: OPEN")
+            self.debug_stream("Thorlabs Flip Mirror is: OPEN")
+            return DevState.OPEN
+        elif self.mount.is_close():
+            self.set_status("Thorlabs Flip Mirror is: CLOSED")
+            self.debug_stream("Thorlabs Flip Mirror is: CLOSED")
+            return DevState.CLOSE
+        else:
+            self.set_status("Thorlabs Flip Mirror is: UNKOWN")
+            self.debug_stream("Thorlabs Flip Mirror is: UNKOWN")
+            return DevState.UNKNOWN
 
     def read_serial_num(self):
         return self.serial_number
