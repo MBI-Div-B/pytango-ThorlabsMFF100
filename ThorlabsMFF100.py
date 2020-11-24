@@ -10,9 +10,22 @@ import thorpy.flipmount.flipmount as fm
 
 from tango import AttrWriteType, DispLevel, DevState
 from tango.server import Device, attribute, command, device_property
+from enum import IntEnum
 
-    
+class MirrorState(IntEnum):
+    closed = 0
+    open = 1
+    moving = 2
+    unknown = 3
+
+
 class ThorlabsMFF100(Device):
+    mffstate = attribute(label="Mirror State",
+                         dtype=MirrorState,
+                         display_level=DispLevel.OPERATOR,
+                         access=AttrWriteType.READ,
+                         doc="State can be 0=closed, 1=open, 2=moving, 3=unknown")
+
     serial_num = attribute(label="Serialnumber",
                            dtype=str,
                            display_level=DispLevel.OPERATOR,
@@ -25,25 +38,40 @@ class ThorlabsMFF100(Device):
         Device.init_device(self)
         self.info_stream('Thorlabs Flip Mirror Mount with serial {:s}'.format(self.serial_number))
         self.mount = fm.flipMount(self.serial_number)
-        self.set_state(DevState.ON)
+        self.__mff_state = 3
 
     def dev_state(self):
         if self.mount.is_moving():
-            self.set_status("Thorlabs Flip Mirror is: MOVING")
-            self.debug_stream("Thorlabs Flip Mirror is: MOVING")
+            self.set_status("Thorlabs Flip Mirror is MOVING")
+            self.debug_stream("Thorlabs Flip Mirror is MOVING")
+            self.__mff_state = 2
             return DevState.MOVING
         elif self.mount.is_open():
-            self.set_status("Thorlabs Flip Mirror is: OPEN")
-            self.debug_stream("Thorlabs Flip Mirror is: OPEN")
+            self.set_status("Thorlabs Flip Mirror is OPEN")
+            self.debug_stream("Thorlabs Flip Mirror is OPEN")
+            self.__mff_state = 1
             return DevState.OPEN
         elif self.mount.is_close():
-            self.set_status("Thorlabs Flip Mirror is: CLOSED")
-            self.debug_stream("Thorlabs Flip Mirror is: CLOSED")
+            self.set_status("Thorlabs Flip Mirror is CLOSED")
+            self.debug_stream("Thorlabs Flip Mirror is CLOSED")
+            self.__mff_state = 0
             return DevState.CLOSE
         else:
-            self.set_status("Thorlabs Flip Mirror is: UNKOWN")
-            self.debug_stream("Thorlabs Flip Mirror is: UNKOWN")
+            self.set_status("Thorlabs Flip Mirror is UNKOWN")
+            self.debug_stream("Thorlabs Flip Mirror is UNKOWN")
+            self.__mff_state = 3
             return DevState.UNKNOWN
+
+    def read_mffstate(self):
+        return self.__mff_state
+        if self.__mff_state == 0:
+            return MirrorState.closed
+        elif self.__mff_state == 1:
+            return MirrorState.open
+        if self.__mff_state == 2:
+            return MirrorState.moving
+        else:
+            return MirrorState.unknown
 
     def read_serial_num(self):
         return self.serial_number
