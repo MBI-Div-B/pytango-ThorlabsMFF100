@@ -41,6 +41,7 @@ class ThorlabsMFF100(Device):
         self.__mff_state = 3
 
     def dev_state(self):
+        self.debug_stream('dev_state')
         if self.mount.is_moving():
             self.set_status("Thorlabs Flip Mirror is MOVING")
             self.debug_stream("Thorlabs Flip Mirror is MOVING")
@@ -61,6 +62,10 @@ class ThorlabsMFF100(Device):
             self.debug_stream("Thorlabs Flip Mirror is UNKOWN")
             self.__mff_state = 3
             return DevState.UNKNOWN
+
+    def always_executed_hook(self):
+        # always read the state to get it updated
+        self.dev_state()    
 
     def read_mffstate(self):
         return self.__mff_state
