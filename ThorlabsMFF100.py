@@ -40,32 +40,23 @@ class ThorlabsMFF100(Device):
         self.mount = fm.flipMount(self.serial_number)
         self.__mff_state = 3
 
-    def dev_state(self):
-        self.debug_stream('dev_state')
+    def always_executed_hook(self):
         if self.mount.is_moving():
             self.set_status("Thorlabs Flip Mirror is MOVING")
-            self.debug_stream("Thorlabs Flip Mirror is MOVING")
             self.__mff_state = 2
-            return DevState.MOVING
+            self.set_state(DevState.MOVING)
         elif self.mount.is_open():
             self.set_status("Thorlabs Flip Mirror is OPEN")
-            self.debug_stream("Thorlabs Flip Mirror is OPEN")
             self.__mff_state = 1
-            return DevState.OPEN
+            self.set_state(DevState.OPEN)
         elif self.mount.is_close():
             self.set_status("Thorlabs Flip Mirror is CLOSED")
-            self.debug_stream("Thorlabs Flip Mirror is CLOSED")
             self.__mff_state = 0
-            return DevState.CLOSE
+            self.set_state(DevState.CLOSE)
         else:
             self.set_status("Thorlabs Flip Mirror is UNKOWN")
-            self.debug_stream("Thorlabs Flip Mirror is UNKOWN")
             self.__mff_state = 3
-            return DevState.UNKNOWN
-
-    def always_executed_hook(self):
-        # always read the state to get it updated
-        self.dev_state()    
+            self.set_state(DevState.UNKNOWN)
 
     def read_mffstate(self):
         return self.__mff_state
