@@ -32,6 +32,14 @@ class ThorlabsMFF100(Device):
                            access=AttrWriteType.READ,
                            doc="Serial number of device")
 
+    inverted = attribute(label="Invert states",
+                           dtype=bool,
+                           display_level=DispLevel.EXPERT,
+                           access=AttrWriteType.READ_WRITE,
+                           doc="Invert open and close states of mirror in TANGO only!",
+                           memorized=True,
+                           hw_memorized=True,)
+
     serial_number = device_property(dtype=str)
 
     def init_device(self):
@@ -39,6 +47,7 @@ class ThorlabsMFF100(Device):
         self.info_stream('Thorlabs Flip Mirror Mount with serial {:s}'.format(self.serial_number))
         self.mount = fm.flipMount(self.serial_number)
         self.__mff_state = 3
+        self.__inverted = False
 
     def always_executed_hook(self):
         if self.mount.is_moving():
@@ -46,13 +55,23 @@ class ThorlabsMFF100(Device):
             self.__mff_state = 2
             self.set_state(DevState.MOVING)
         elif self.mount.is_open():
-            self.set_status("Thorlabs Flip Mirror is OPEN")
-            self.__mff_state = 1
-            self.set_state(DevState.OPEN)
+            if self.__inverted:
+                self.set_status("Thorlabs Flip Mirror is CLOSED")
+                self.__mff_state = 0
+                self.set_state(DevState.CLOSE)
+            else:
+                self.set_status("Thorlabs Flip Mirror is OPEN")
+                self.__mff_state = 1
+                self.set_state(DevState.OPEN)
         elif self.mount.is_close():
-            self.set_status("Thorlabs Flip Mirror is CLOSED")
-            self.__mff_state = 0
-            self.set_state(DevState.CLOSE)
+            if self.__inverted:
+                self.set_status("Thorlabs Flip Mirror is OPEN")
+                self.__mff_state = 1
+                self.set_state(DevState.OPEN)
+            else:
+                self.set_status("Thorlabs Flip Mirror is CLOSED")
+                self.__mff_state = 0
+                self.set_state(DevState.CLOSE)
         else:
             self.set_status("Thorlabs Flip Mirror is UNKOWN")
             self.__mff_state = 3
@@ -72,6 +91,12 @@ class ThorlabsMFF100(Device):
     def read_serial_num(self):
         return self.serial_number
 
+    def read_inverted(self):
+        return self.__inverted
+    
+    def write_inverted(self, value):
+        self.__inverted = bool(value)
+
     def read_info(self):
         return 'Information', dict(manufacturer='Thorlabs',
                                    model='MFF101',
@@ -83,11 +108,17 @@ class ThorlabsMFF100(Device):
 
     @command
     def Close(self):
-        self.mount.close()
+        if self.__inverted:
+            self.mount.open()
+        else:
+            self.mount.close()
 
     @command
     def Open(self):
-        self.mount.open()
+        if self.__inverted:
+            self.mount.close()
+        else:
+            self.mount.open()
 
     @command
     def Identify(self):
