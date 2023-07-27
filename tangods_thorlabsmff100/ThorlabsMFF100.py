@@ -12,6 +12,7 @@ from tango import AttrWriteType, DispLevel, DevState
 from tango.server import Device, attribute, command, device_property
 from enum import IntEnum
 
+
 class MirrorState(IntEnum):
     closed = 0
     open = 1
@@ -20,31 +21,39 @@ class MirrorState(IntEnum):
 
 
 class ThorlabsMFF100(Device):
-    mffstate = attribute(label="Mirror State",
-                         dtype=MirrorState,
-                         display_level=DispLevel.OPERATOR,
-                         access=AttrWriteType.READ,
-                         doc="State can be 0=closed, 1=open, 2=moving, 3=unknown")
+    mffstate = attribute(
+        label="Mirror State",
+        dtype=MirrorState,
+        display_level=DispLevel.OPERATOR,
+        access=AttrWriteType.READ,
+        doc="State can be 0=closed, 1=open, 2=moving, 3=unknown",
+    )
 
-    serial_num = attribute(label="Serialnumber",
-                           dtype=str,
-                           display_level=DispLevel.OPERATOR,
-                           access=AttrWriteType.READ,
-                           doc="Serial number of device")
+    serial_num = attribute(
+        label="Serialnumber",
+        dtype=str,
+        display_level=DispLevel.OPERATOR,
+        access=AttrWriteType.READ,
+        doc="Serial number of device",
+    )
 
-    inverted = attribute(label="Invert states",
-                           dtype=bool,
-                           display_level=DispLevel.EXPERT,
-                           access=AttrWriteType.READ_WRITE,
-                           doc="Invert open and close states of mirror in TANGO only!",
-                           memorized=True,
-                           hw_memorized=True,)
+    inverted = attribute(
+        label="Invert states",
+        dtype=bool,
+        display_level=DispLevel.EXPERT,
+        access=AttrWriteType.READ_WRITE,
+        doc="Invert open and close states of mirror in TANGO only!",
+        memorized=True,
+        hw_memorized=True,
+    )
 
     serial_number = device_property(dtype=str)
 
     def init_device(self):
         Device.init_device(self)
-        self.info_stream('Thorlabs Flip Mirror Mount with serial {:s}'.format(self.serial_number))
+        self.info_stream(
+            "Thorlabs Flip Mirror Mount with serial {:s}".format(self.serial_number)
+        )
         self.mount = fm.flipMount(self.serial_number)
         self.__mff_state = 3
         self.__inverted = False
@@ -93,14 +102,14 @@ class ThorlabsMFF100(Device):
 
     def read_inverted(self):
         return self.__inverted
-    
+
     def write_inverted(self, value):
         self.__inverted = bool(value)
 
     def read_info(self):
-        return 'Information', dict(manufacturer='Thorlabs',
-                                   model='MFF101',
-                                   version_number=self.__serial_num)
+        return "Information", dict(
+            manufacturer="Thorlabs", model="MFF101", version_number=self.__serial_num
+        )
 
     @command
     def Flip(self):
